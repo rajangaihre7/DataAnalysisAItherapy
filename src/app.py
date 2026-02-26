@@ -10,8 +10,7 @@ st.set_page_config(page_title="AI Therapy Dashboard", layout="wide")
 # --- 2. FAIL-SAFE DATA LOADING ---
 @st.cache_data
 def load_data():
-    file_path = r"C:\Users\Dell\Desktop\Research Assistant\Data Analysis\Data\Bronze\data_bronze_numeric_format_data.csv"
-    
+    file_path = r"Data/Bronze/data_bronze_numeric_format_data.csv"    
     # Check if file exists to prevent black screen crash
     if not os.path.exists(file_path):
         return None, f"Error: '{file_path}' not found in the current folder."
@@ -49,7 +48,7 @@ def load_data():
 # --- 3. DYNAMIC MODULE LOADER ---
 def load_module(module_name):
     """Dynamically load a module from the Module folder"""
-    module_path = rf"C:\Users\Dell\Desktop\Research Assistant\Data Analysis\src\Module\{module_name}.py"
+    module_path = rf"Data/Module/{module_name}.py"
     
     if not os.path.exists(module_path):
         return None

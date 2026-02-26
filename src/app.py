@@ -10,10 +10,13 @@ st.set_page_config(page_title="AI Therapy Dashboard", layout="wide")
 # --- 2. FAIL-SAFE DATA LOADING ---
 @st.cache_data
 def load_data():
-    file_path = r"Data/Bronze/data_bronze_numeric_format_data.csv"    
+    # Get the directory of this script
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    file_path = os.path.join(script_dir, "..", "Data", "Bronze", "data_bronze_numeric_format_data.csv")
+    
     # Check if file exists to prevent black screen crash
     if not os.path.exists(file_path):
-        return None, f"Error: '{file_path}' not found in the current folder."
+        return None, f"Error: '{file_path}' not found."
     
     try:
         # Try loading with cp1252 (Windows) encoding which handles the 0x92 byte
@@ -48,7 +51,9 @@ def load_data():
 # --- 3. DYNAMIC MODULE LOADER ---
 def load_module(module_name):
     """Dynamically load a module from the Module folder"""
-    module_path = rf"Data/Module/{module_name}.py"
+    # Get the directory of this script
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    module_path = os.path.join(script_dir, "Module", f"{module_name}.py")
     
     if not os.path.exists(module_path):
         return None

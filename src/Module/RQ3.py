@@ -56,7 +56,7 @@ def display(df, scale_map=None):
     
     ax.set_xlabel('Session Number', fontsize=12, fontweight='bold')
     ax.set_ylabel('Score', fontsize=12, fontweight='bold')
-    ax.set_title('Longitudinal Trends in Behavioral Generalization and Real-Life Application', 
+    ax.set_title('Trends in Behavioral Generalization and Real-Life Application', 
                 fontsize=13, fontweight='bold', pad=20)
     ax.legend(fontsize=11, loc='upper left', frameon=True, shadow=False)
     

@@ -37,7 +37,9 @@ def load_data():
             "Did the participant generalise the behaviour outside the story?",
             "Did the participant link the story to real-life experiences?",
             "How much different scenarios stories impact overall social behaviour ?",
-            "How much did the relationship between a participant and carer/parent improved?"
+            "How much did the relationship between a participant and carer/parent improved?",
+            "Did the response time decrease from the last session?",
+            "Did the response time increase from the last session?"
         ]
         
         for col in target_cols:
@@ -77,12 +79,15 @@ else:
     st.sidebar.header("Select Research Question")
     rq_options = {
         # "Welcome / Overview": None,
+        "Descriptive Analysis": "Descriptive_Analysis",
         "RQ1: Emotional Growth": "RQ1",
         "RQ2: Distress Reduction": "RQ2",
         "RQ3: Real-World Generalization": "RQ3",
         "RQ4: Family Relationship Impact": "RQ4",
         "RQ5: Self-Initiated Social Interaction": "RQ5",
-        "RQ6: Social Behaviour Impact": "RQ9",
+        "RQ6: Response Time Improvement": "RQ6",
+        "RQ7: Personalization & Verbal Participation": "RQ7",
+        "RQ8: Social Behaviour Impact": "RQ9"
     }
     
     selected = st.sidebar.radio("Analysis View", list(rq_options.keys()))

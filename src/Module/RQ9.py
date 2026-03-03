@@ -4,8 +4,8 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 def display(df, scale_map=None):
-    """Display RQ6 Overall Social Behaviour Impact"""
-    st.subheader("RQ6: Overall Social Behaviour Improvement")
+    """Display RQ8 Overall Social Behaviour Impact"""
+    st.subheader("RQ8: Overall Social Behaviour Improvement")
     q26 = "How much different scenarios stories impact overall social behaviour ?"
     st.markdown("**Q26:** " + q26)
     

@@ -3,13 +3,15 @@ import pandas as pd
 import os
 import importlib.util
 import sys
+import time
 
 # --- 1. PAGE CONFIG (Must be the very first Streamlit command) ---
 st.set_page_config(page_title="AI Therapy Dashboard", layout="wide")
 
-# --- 2. FAIL-SAFE DATA LOADING ---
+# --- 2. FAIL-SAFE DATA LOADING WITH AUTO-CACHE INVALIDATION ---
 @st.cache_data
-def load_data():
+def load_data_cached(file_mod_time):
+    """Cached data loading that invalidates when file changes"""
     # Get the directory of this script
     script_dir = os.path.dirname(os.path.abspath(__file__))
     file_path = os.path.join(script_dir, "..", "Data", "Bronze", "data_bronze_numeric_format_data.csv")
@@ -49,6 +51,19 @@ def load_data():
         return df, scale_map
     except Exception as e:
         return None, f"Data Load Error: {str(e)}"
+
+def load_data():
+    """Wrapper function that checks file modification time"""
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    file_path = os.path.join(script_dir, "..", "Data", "Bronze", "data_bronze_numeric_format_data.csv")
+    
+    # Get file modification time to invalidate cache when file changes
+    if os.path.exists(file_path):
+        file_mod_time = os.path.getmtime(file_path)
+    else:
+        file_mod_time = 0
+    
+    return load_data_cached(file_mod_time)
 
 # --- 3. DYNAMIC MODULE LOADER ---
 def load_module(module_name):

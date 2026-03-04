@@ -74,7 +74,7 @@ def display(df, scale_map=None):
     
     # ============ AGE GROUP ANALYSIS: 8-14 YEARS ============
     st.divider()
-    st.subheader("Age-Group Analysis: 8-14 Years (Session-wise Improvement)")
+    st.subheader("Age-Group Analysis: 8-14 Years")
     st.markdown("**Engagement and Emotional Connection Trends by Gender (Age 8-14)**")
     
     # Filter data for age group 8-14
@@ -114,7 +114,7 @@ def display(df, scale_map=None):
         
         ax1.set_xlabel('Session Number', fontsize=12, fontweight='bold')
         ax1.set_ylabel('Engagement Score', fontsize=12, fontweight='bold')
-        ax1.set_title('Engagement (Q1) Improvement Across Sessions\nAge 8-14 by Gender', fontsize=12, fontweight='bold', pad=15)
+        ax1.set_title('Engagement Improvement Across Sessions\nAge 8-14 by Gender', fontsize=12, fontweight='bold', pad=15)
         ax1.set_ylim(-0.8, 4.8)
         ax1.set_yticks([0, 1, 2, 3, 4])
         ax1.grid(True, linestyle='-', alpha=0.3, linewidth=0.5, color='gray')
@@ -148,7 +148,7 @@ def display(df, scale_map=None):
         
         ax2.set_xlabel('Session Number', fontsize=12, fontweight='bold')
         ax2.set_ylabel('Connection Score', fontsize=12, fontweight='bold')
-        ax2.set_title('Emotional Connection (Q3) Improvement Across Sessions\nAge 8-14 by Gender', fontsize=12, fontweight='bold', pad=15)
+        ax2.set_title('Emotional Connection Improvement Across Sessions\nAge 8-14 by Gender', fontsize=12, fontweight='bold', pad=15)
         ax2.set_ylim(-0.8, 4.8)
         ax2.set_yticks([0, 1, 2, 3, 4])
         ax2.grid(True, linestyle='-', alpha=0.3, linewidth=0.5, color='gray')
@@ -172,14 +172,319 @@ def display(df, scale_map=None):
                     'Participants': len(gender_df['Participant id'].unique()),
                     'Sessions': len(gender_df),
                     'Avg Engagement': f"{gender_df[q1].mean():.2f}",
+                    'Engagement Std Dev': f"{gender_df[q1].std():.2f}",
                     'Avg Connection': f"{gender_df[q3].mean():.2f}",
-                    'Engagement Trend': f"{gender_df.groupby('Session number')[q1].mean().iloc[-1] - gender_df.groupby('Session number')[q1].mean().iloc[0]:.2f}" if len(gender_df.groupby('Session number')[q1].mean()) > 1 else "N/A"
+                    'Connection Std Dev': f"{gender_df[q3].std():.2f}"
                 })
         
         summary_df = pd.DataFrame(summary_data)
         st.dataframe(summary_df, use_container_width=True, hide_index=True)
     else:
         st.warning("No data available for age group 8-14")
+
+    # ============ AGE GROUP ANALYSIS: 15-19 YEARS ============
+    st.divider()
+    st.subheader("Age-Group Analysis: 15-19 Years")
+    st.markdown("**Engagement and Emotional Connection Trends (Age 15-19)**")
+    
+    # Filter data for age group 15-19
+    age_filtered_df_15_19 = df[(df['Age'] >= 15) & (df['Age'] <= 19)].copy()
+    
+    if len(age_filtered_df_15_19) > 0:
+        # Calculate trends by gender and session
+        male_trend_15_19 = age_filtered_df_15_19[age_filtered_df_15_19['Gender'] == 'Male'].groupby('Session number')[[q1, q3]].mean().reset_index()
+        female_trend_15_19 = age_filtered_df_15_19[age_filtered_df_15_19['Gender'] == 'Female'].groupby('Session number')[[q1, q3]].mean().reset_index()
+        
+        # Create visualization
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
+        fig.patch.set_facecolor('white')
+        
+        # Plot 1: Engagement (Q1) trends
+        if len(male_trend_15_19) > 0:
+            ax1.plot(male_trend_15_19['Session number'], male_trend_15_19[q1], marker='o', linewidth=2.5, 
+                    markersize=10, label='Male', color='#3498db', markeredgewidth=2, markeredgecolor='white')
+            # Add annotations for male engagement
+            for idx, row in male_trend_15_19.iterrows():
+                ax1.annotate(f'{row[q1]:.2f}', 
+                           xy=(row['Session number'], row[q1]),
+                           xytext=(0, 25), textcoords='offset points',
+                           ha='center', fontsize=10, fontweight='bold',
+                           color='#3498db', family='sans-serif')
+        
+        if len(female_trend_15_19) > 0:
+            ax1.plot(female_trend_15_19['Session number'], female_trend_15_19[q1], marker='s', linewidth=2.5, 
+                    markersize=10, label='Female', color='#e74c3c', markeredgewidth=2, markeredgecolor='white')
+            # Add annotations for female engagement
+            for idx, row in female_trend_15_19.iterrows():
+                ax1.annotate(f'{row[q1]:.2f}', 
+                           xy=(row['Session number'], row[q1]),
+                           xytext=(0, -28), textcoords='offset points',
+                           ha='center', fontsize=10, fontweight='bold',
+                           color='#e74c3c', family='sans-serif')
+        
+        ax1.set_xlabel('Session Number', fontsize=12, fontweight='bold')
+        ax1.set_ylabel('Engagement Score', fontsize=12, fontweight='bold')
+        ax1.set_title('Engagement Improvement Across Sessions\n Age 15-19', fontsize=12, fontweight='bold', pad=15)
+        ax1.set_ylim(-0.8, 4.8)
+        ax1.set_yticks([0, 1, 2, 3, 4])
+        ax1.grid(True, linestyle='-', alpha=0.3, linewidth=0.5, color='gray')
+        ax1.set_axisbelow(True)
+        ax1.legend(fontsize=11, loc='best', frameon=True, shadow=False)
+        ax1.spines['top'].set_visible(False)
+        ax1.spines['right'].set_visible(False)
+        
+        # Plot 2: Emotional Connection (Q3) trends
+        if len(male_trend_15_19) > 0:
+            ax2.plot(male_trend_15_19['Session number'], male_trend_15_19[q3], marker='o', linewidth=2.5, 
+                    markersize=10, label='Male', color='#3498db', markeredgewidth=2, markeredgecolor='white')
+            # Add annotations for male connection
+            for idx, row in male_trend_15_19.iterrows():
+                ax2.annotate(f'{row[q3]:.2f}', 
+                           xy=(row['Session number'], row[q3]),
+                           xytext=(0, -28), textcoords='offset points',
+                           ha='center', fontsize=10, fontweight='bold',
+                           color='#3498db', family='sans-serif')
+        
+        if len(female_trend_15_19) > 0:
+            ax2.plot(female_trend_15_19['Session number'], female_trend_15_19[q3], marker='s', linewidth=2.5, 
+                    markersize=10, label='Female', color='#e74c3c', markeredgewidth=2, markeredgecolor='white')
+            # Add annotations for female connection
+            for idx, row in female_trend_15_19.iterrows():
+                ax2.annotate(f'{row[q3]:.2f}', 
+                           xy=(row['Session number'], row[q3]),
+                           xytext=(0, 25), textcoords='offset points',
+                           ha='center', fontsize=10, fontweight='bold',
+                           color='#e74c3c', family='sans-serif')
+        
+        ax2.set_xlabel('Session Number', fontsize=12, fontweight='bold')
+        ax2.set_ylabel('Connection Score', fontsize=12, fontweight='bold')
+        ax2.set_title('Emotional Connection Improvement Across Sessions\nAge 15-19', fontsize=12, fontweight='bold', pad=15)
+        ax2.set_ylim(-0.8, 4.8)
+        ax2.set_yticks([0, 1, 2, 3, 4])
+        ax2.grid(True, linestyle='-', alpha=0.3, linewidth=0.5, color='gray')
+        ax2.set_axisbelow(True)
+        ax2.legend(fontsize=11, loc='best', frameon=True, shadow=False)
+        ax2.spines['top'].set_visible(False)
+        ax2.spines['right'].set_visible(False)
+        
+        plt.tight_layout()
+        st.pyplot(fig)
+        
+        # Statistics table
+        st.markdown("**Summary Statistics for Age 15-19**")
+        
+        summary_data_15_19 = []
+        for gender in ['Male', 'Female']:
+            gender_df = age_filtered_df_15_19[age_filtered_df_15_19['Gender'] == gender]
+            if len(gender_df) > 0:
+                summary_data_15_19.append({
+                    'Gender': gender,
+                    'Participants': len(gender_df['Participant id'].unique()),
+                    'Sessions': len(gender_df),
+                    'Avg Engagement': f"{gender_df[q1].mean():.2f}",
+                    'Engagement Std Dev': f"{gender_df[q1].std():.2f}",
+                    'Avg Connection': f"{gender_df[q3].mean():.2f}",
+                    'Connection Std Dev': f"{gender_df[q3].std():.2f}"
+                })
+        
+        summary_df_15_19 = pd.DataFrame(summary_data_15_19)
+        st.dataframe(summary_df_15_19, use_container_width=True, hide_index=True)
+    else:
+        st.warning("No data available for age group 15-19")
+
+    # ============ AGE GROUP ANALYSIS: 20-26 YEARS ============
+    st.divider()
+    st.subheader("Age-Group Analysis: 20-26 Years")
+    st.markdown("**Engagement and Emotional Connection Trends(Age 20-26)**")
+    
+    # Filter data for age group 20-26
+    age_filtered_df_20_26 = df[(df['Age'] >= 20) & (df['Age'] <= 26)].copy()
+    
+    if len(age_filtered_df_20_26) > 0:
+        # Calculate trends by gender and session
+        male_trend_20_26 = age_filtered_df_20_26[age_filtered_df_20_26['Gender'] == 'Male'].groupby('Session number')[[q1, q3]].mean().reset_index()
+        female_trend_20_26 = age_filtered_df_20_26[age_filtered_df_20_26['Gender'] == 'Female'].groupby('Session number')[[q1, q3]].mean().reset_index()
+        
+        # Create visualization
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
+        fig.patch.set_facecolor('white')
+        
+        # Plot 1: Engagement (Q1) trends
+        if len(male_trend_20_26) > 0:
+            ax1.plot(male_trend_20_26['Session number'], male_trend_20_26[q1], marker='o', linewidth=2.5, 
+                    markersize=10, label='Male', color='#3498db', markeredgewidth=2, markeredgecolor='white')
+            # Add annotations for male engagement
+            for idx, row in male_trend_20_26.iterrows():
+                ax1.annotate(f'{row[q1]:.2f}', 
+                           xy=(row['Session number'], row[q1]),
+                           xytext=(0, 25), textcoords='offset points',
+                           ha='center', fontsize=10, fontweight='bold',
+                           color='#3498db', family='sans-serif')
+        
+        if len(female_trend_20_26) > 0:
+            ax1.plot(female_trend_20_26['Session number'], female_trend_20_26[q1], marker='s', linewidth=2.5, 
+                    markersize=10, label='Female', color='#e74c3c', markeredgewidth=2, markeredgecolor='white')
+            # Add annotations for female engagement
+            for idx, row in female_trend_20_26.iterrows():
+                ax1.annotate(f'{row[q1]:.2f}', 
+                           xy=(row['Session number'], row[q1]),
+                           xytext=(0, -28), textcoords='offset points',
+                           ha='center', fontsize=10, fontweight='bold',
+                           color='#e74c3c', family='sans-serif')
+        
+        ax1.set_xlabel('Session Number', fontsize=12, fontweight='bold')
+        ax1.set_ylabel('Engagement Score', fontsize=12, fontweight='bold')
+        ax1.set_title('Engagement Improvement Across Sessions\nAge 20-26', fontsize=12, fontweight='bold', pad=15)
+        ax1.set_ylim(-0.8, 4.8)
+        ax1.set_yticks([0, 1, 2, 3, 4])
+        ax1.grid(True, linestyle='-', alpha=0.3, linewidth=0.5, color='gray')
+        ax1.set_axisbelow(True)
+        ax1.legend(fontsize=11, loc='best', frameon=True, shadow=False)
+        ax1.spines['top'].set_visible(False)
+        ax1.spines['right'].set_visible(False)
+        
+        # Plot 2: Emotional Connection (Q3) trends
+        if len(male_trend_20_26) > 0:
+            ax2.plot(male_trend_20_26['Session number'], male_trend_20_26[q3], marker='o', linewidth=2.5, 
+                    markersize=10, label='Male', color='#3498db', markeredgewidth=2, markeredgecolor='white')
+            # Add annotations for male connection
+            for idx, row in male_trend_20_26.iterrows():
+                ax2.annotate(f'{row[q3]:.2f}', 
+                           xy=(row['Session number'], row[q3]),
+                           xytext=(0, -28), textcoords='offset points',
+                           ha='center', fontsize=10, fontweight='bold',
+                           color='#3498db', family='sans-serif')
+        
+        if len(female_trend_20_26) > 0:
+            ax2.plot(female_trend_20_26['Session number'], female_trend_20_26[q3], marker='s', linewidth=2.5, 
+                    markersize=10, label='Female', color='#e74c3c', markeredgewidth=2, markeredgecolor='white')
+            # Add annotations for female connection
+            for idx, row in female_trend_20_26.iterrows():
+                ax2.annotate(f'{row[q3]:.2f}', 
+                           xy=(row['Session number'], row[q3]),
+                           xytext=(0, 25), textcoords='offset points',
+                           ha='center', fontsize=10, fontweight='bold',
+                           color='#e74c3c', family='sans-serif')
+        
+        ax2.set_xlabel('Session Number', fontsize=12, fontweight='bold')
+        ax2.set_ylabel('Connection Score', fontsize=12, fontweight='bold')
+        ax2.set_title('Emotional Connection Improvement Across Sessions\nAge 20-26 by Gender', fontsize=12, fontweight='bold', pad=15)
+        ax2.set_ylim(-0.8, 4.8)
+        ax2.set_yticks([0, 1, 2, 3, 4])
+        ax2.grid(True, linestyle='-', alpha=0.3, linewidth=0.5, color='gray')
+        ax2.set_axisbelow(True)
+        ax2.legend(fontsize=11, loc='best', frameon=True, shadow=False)
+        ax2.spines['top'].set_visible(False)
+        ax2.spines['right'].set_visible(False)
+        
+        plt.tight_layout()
+        st.pyplot(fig)
+        
+        # Statistics table
+        st.markdown("**Summary Statistics for Age 20-26**")
+        
+        summary_data_20_26 = []
+        for gender in ['Male', 'Female']:
+            gender_df = age_filtered_df_20_26[age_filtered_df_20_26['Gender'] == gender]
+            if len(gender_df) > 0:
+                summary_data_20_26.append({
+                    'Gender': gender,
+                    'Participants': len(gender_df['Participant id'].unique()),
+                    'Sessions': len(gender_df),
+                    'Avg Engagement': f"{gender_df[q1].mean():.2f}",
+                    'Engagement Std Dev': f"{gender_df[q1].std():.2f}",
+                    'Avg Connection': f"{gender_df[q3].mean():.2f}",
+                    'Connection Std Dev': f"{gender_df[q3].std():.2f}"
+                })
+        
+        summary_df_20_26 = pd.DataFrame(summary_data_20_26)
+        st.dataframe(summary_df_20_26, use_container_width=True, hide_index=True)
+    else:
+        st.warning("No data available for age group 20-26")
+
+    # ============ COMPARATIVE ANALYSIS ACROSS ALL AGE GROUPS ============
+    st.divider()
+    st.subheader("Comparative Analysis Across Age Groups")
+    st.markdown("**Overall Engagement and Emotional Connection Comparison**")
+    
+    # Aggregate statistics across all age groups
+    all_age_groups = [
+        {'range': '8-14', 'df': age_filtered_df},
+        {'range': '15-19', 'df': age_filtered_df_15_19},
+        {'range': '20-26', 'df': age_filtered_df_20_26}
+    ]
+    
+    comparative_data = []
+    for age_group_info in all_age_groups:
+        age_group_df = age_group_info['df']
+        if len(age_group_df) > 0:
+            comparative_data.append({
+                'Age Group': age_group_info['range'],
+                'Total Participants': len(age_group_df['Participant id'].unique()),
+                'Total Sessions': len(age_group_df),
+                'Avg Engagement Score': f"{age_group_df[q1].mean():.2f}",
+                'Avg Connection Score': f"{age_group_df[q3].mean():.2f}",
+                'Engagement Std Dev': f"{age_group_df[q1].std():.2f}",
+                'Connection Std Dev': f"{age_group_df[q3].std():.2f}"
+            })
+    
+    comparative_df = pd.DataFrame(comparative_data)
+    st.dataframe(comparative_df, use_container_width=True, hide_index=True)
+    
+    # Visualization: Compare average scores across age groups
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
+    fig.patch.set_facecolor('white')
+    
+    age_groups_labels = []
+    engagement_scores = []
+    connection_scores = []
+    
+    for age_group_info in all_age_groups:
+        age_group_df = age_group_info['df']
+        if len(age_group_df) > 0:
+            age_groups_labels.append(age_group_info['range'])
+            engagement_scores.append(age_group_df[q1].mean())
+            connection_scores.append(age_group_df[q3].mean())
+    
+    if age_groups_labels:
+        # Engagement comparison
+        colors_eng = ['#3498db', '#e74c3c', '#2ecc71']
+        bars1 = ax1.bar(age_groups_labels, engagement_scores, color=colors_eng[:len(age_groups_labels)], edgecolor='black', linewidth=1.5)
+        ax1.set_ylabel('Average Engagement Score', fontsize=12, fontweight='bold')
+        ax1.set_xlabel('Age Group', fontsize=12, fontweight='bold')
+        ax1.set_title('Engagement Scores by Age Group', fontsize=12, fontweight='bold', pad=15)
+        ax1.set_ylim(0, 4)
+        ax1.grid(True, axis='y', linestyle='-', alpha=0.3, linewidth=0.5)
+        ax1.set_axisbelow(True)
+        
+        # Add value labels on bars
+        for bar in bars1:
+            height = bar.get_height()
+            ax1.annotate(f'{height:.2f}',
+                        xy=(bar.get_x() + bar.get_width() / 2, height),
+                        xytext=(0, 5), textcoords='offset points',
+                        ha='center', fontweight='bold', fontsize=11)
+        
+        # Connection comparison
+        colors_conn = ['#9b59b6', '#f39c12', '#1abc9c']
+        bars2 = ax2.bar(age_groups_labels, connection_scores, color=colors_conn[:len(age_groups_labels)], edgecolor='black', linewidth=1.5)
+        ax2.set_ylabel('Average Connection Score', fontsize=12, fontweight='bold')
+        ax2.set_xlabel('Age Group', fontsize=12, fontweight='bold')
+        ax2.set_title('Emotional Connection Scores by Age Group', fontsize=12, fontweight='bold', pad=15)
+        ax2.set_ylim(0, 4)
+        ax2.grid(True, axis='y', linestyle='-', alpha=0.3, linewidth=0.5)
+        ax2.set_axisbelow(True)
+        
+        # Add value labels on bars
+        for bar in bars2:
+            height = bar.get_height()
+            ax2.annotate(f'{height:.2f}',
+                        xy=(bar.get_x() + bar.get_width() / 2, height),
+                        xytext=(0, 5), textcoords='offset points',
+                        ha='center', fontweight='bold', fontsize=11)
+        
+        plt.tight_layout()
+        st.pyplot(fig)
 
     # Display scale reference
     if scale_map:

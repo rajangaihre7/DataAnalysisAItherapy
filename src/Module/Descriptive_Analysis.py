@@ -98,7 +98,7 @@ def display(df, scale_map=None):
         
         # Create age groups
         unique_df['Age_Group'] = unique_df['Age'].apply(get_age_group)
-        age_group_order = ['8-14', '15-19', '20-26', '27-35', '36+', 'Unknown']
+        age_group_order = ['1-8', '9-14', '15-19', '20-26', '27-35', '36+', 'Unknown']
         
         # Count age groups
         age_counts = unique_df['Age_Group'].value_counts().reindex(age_group_order, fill_value=0)

@@ -4,6 +4,7 @@ import os
 import importlib.util
 import sys
 import time
+from data_transformation import load_and_transform_silver_data, get_scale_map
 
 # --- 1. PAGE CONFIG (Must be the very first Streamlit command) ---
 st.set_page_config(page_title="AI Therapy Dashboard", layout="wide")
@@ -14,39 +15,21 @@ def load_data_cached(file_mod_time):
     """Cached data loading that invalidates when file changes"""
     # Get the directory of this script
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    file_path = os.path.join(script_dir, "..", "Data", "Bronze", "data_bronze_numeric_format_data.csv")
+    bronze_path = os.path.join(script_dir, "..", "Data", "Bronze", "data_bronze_numeric_format_data.csv")
     
     # Check if file exists to prevent black screen crash
-    if not os.path.exists(file_path):
-        return None, f"Error: '{file_path}' not found."
+    if not os.path.exists(bronze_path):
+        return None, f"Error: '{bronze_path}' not found."
     
     try:
-        # Try loading with cp1252 (Windows) encoding which handles the 0x92 byte
-        df = pd.read_csv(file_path, encoding='cp1252')
+        # Load and transform Bronze data
+        df, error_msg = load_and_transform_silver_data(bronze_path)
         
-        # CLEANING: Remove hidden spaces from column names (e.g., 'Q8 ' -> 'Q8')
-        df.columns = df.columns.str.strip()
+        if error_msg:
+            return None, error_msg
         
-        # Define our mapping for the 0-4 scale
-        scale_map = {0: 'Not at all', 1: 'Slightly', 2: 'Moderately', 3: 'Very', 4: 'Fully'}
-        
-        # List of columns to convert to numbers
-        target_cols = [
-            "How engaged was the participant during today's storytelling session?",
-            "Did the participant demonstrate emotional connection?",
-            "Did the participant exhibit distress, boredom, or frustration?",
-            "Did the participant initiate interactions related to the story?",
-            "Did the participant generalise the behaviour outside the story?",
-            "Did the participant link the story to real-life experiences?",
-            "How much different scenarios stories impact overall social behaviour ?",
-            "How much did the relationship between a participant and carer/parent improved?",
-            "Did the response time decrease from the last session?",
-            "Did the response time increase from the last session?"
-        ]
-        
-        for col in target_cols:
-            if col in df.columns:
-                df[col] = pd.to_numeric(df[col], errors='coerce')
+        # Get scale mapping
+        scale_map = get_scale_map()
             
         return df, scale_map
     except Exception as e:
@@ -55,11 +38,11 @@ def load_data_cached(file_mod_time):
 def load_data():
     """Wrapper function that checks file modification time"""
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    file_path = os.path.join(script_dir, "..", "Data", "Bronze", "data_bronze_numeric_format_data.csv")
+    bronze_path = os.path.join(script_dir, "..", "Data", "Bronze", "data_bronze_numeric_format_data.csv")
     
     # Get file modification time to invalidate cache when file changes
-    if os.path.exists(file_path):
-        file_mod_time = os.path.getmtime(file_path)
+    if os.path.exists(bronze_path):
+        file_mod_time = os.path.getmtime(bronze_path)
     else:
         file_mod_time = 0
     
@@ -102,7 +85,8 @@ else:
         "RQ5: Self-Initiated Social Interaction": "RQ5",
         "RQ6: Response Time Improvement": "RQ6",
         "RQ7: Personalization & Verbal Participation": "RQ7",
-        "RQ8: Social Behaviour Impact": "RQ9"
+        "RQ8: Social Behaviour Impact": "RQ8",
+        "RQ9: Comprehensive Heatmap Analysis": "RQ9"
     }
     
     selected = st.sidebar.radio("Analysis View", list(rq_options.keys()))

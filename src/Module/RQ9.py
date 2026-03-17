@@ -1,104 +1,137 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 
 def display(df, scale_map=None):
-    """Display RQ8 Overall Social Behaviour Impact"""
-    st.subheader("RQ8: Overall Social Behaviour Improvement")
-    q26 = "How much different scenarios stories impact overall social behaviour ?"
-    st.markdown("**Q26:** " + q26)
+    """Display RQ9: Correlation Heatmap of All Questions"""
+    st.subheader("RQ9: Correlation Analysis - all Questions (Q1-Q25)")
+    st.markdown("**Correlation heatmap showing relationships between all survey questions**")
     
-    trend = df.groupby('Session number')[q26].mean().reset_index()
+    # Define all question columns with short names (Q1 to Q25)
+    questions_mapping = {
+        "How engaged was the participant during today's storytelling session?": "Q1: Engagement",
+        "How well did the participant understand that this story is personalised for them?": "Q2: Understanding",
+        "Did the participant demonstrate emotional connection?": "Q3: Connection",
+        "How would you rate the participant's verbal participation?": "Q4: Verbal",
+        "Did the participant maintain attention throughout the session?": "Q5: Attention",
+        "How likely a participant was to retell and use the stories in his/her daily conversation or interaction with\ntheir peers, carers, parents or therapists?": "Q6: Retelling",
+        "Did the participant show any signs of enjoyment during the session?": "Q7: Enjoyment",
+        "Did the participant exhibit distress, boredom, or frustration? ": "Q8: Distress",
+        "Did the participant initiate interactions related to the story?": "Q9: Initiation",
+        "Did the participant repeat the story or any content from the story?": "Q10: Repetition",
+        "Did the participant want to or try to creatively change the story?": "Q11: Creativity",
+        "How much did the relationship between a participant and carer/parent improved?": "Q13: RelationImprove",
+        "Did the participant express their feelings about the story (verbally or otherwise)?": "Q14: Expression",
+       # "What is the response time of the participant? (in minutes roughly)": "Q15: ResponseTime",
+        "Did the participant apply the learning during the session?": "Q18: Apply learning",
+        "Did the participant generalise the behaviour outside the story?": "Q19: Generalize",
+        "Did the participant recall or refer to a previous story or theme?": "Q20: Recall",
+        "Did the participant reflect on or comment about the theme after the story ended?": "Q21: Reflect",
+        "Did the participant link the story to real-life experiences?": "Q22: LinkReal",
+        "How much different scenarios stories impact overall social behaviour ?": "Q23: SocialImpact"
+    }
     
-    fig, ax = plt.subplots(figsize=(12, 7))
+    # Filter available questions that exist in the dataframe
+    available_questions = [q for q in questions_mapping.keys() if q in df.columns]
+    available_short_names = [questions_mapping[q] for q in available_questions]
+    
+    if len(available_questions) == 0:
+        st.error("No questions found in the dataset")
+        return
+    
+    # Convert all question columns to numeric to avoid errors
+    df_numeric = df.copy()
+    for question in available_questions:
+        df_numeric[question] = pd.to_numeric(df_numeric[question], errors='coerce')
+    
+    st.info(f"Found {len(available_questions)} questions for correlation analysis")
+    
+    # --- CORRELATION HEATMAP ---
+    st.markdown("---")
+    st.markdown("#### Correlation Heatmap - All Questions")
+    st.write("Shows correlation coefficients between all survey questions (values range from -1 to 1)")
+    st.write("")
+    
+    # Create correlation matrix
+    correlation_matrix = df_numeric[available_questions].corr()
+    
+    # Rename columns and index with short names
+    correlation_matrix.columns = available_short_names
+    correlation_matrix.index = available_short_names
+    
+    # Create large heatmap
+    fig, ax = plt.subplots(figsize=(16, 14))
     fig.patch.set_facecolor('white')
     
-    bars = ax.bar(trend['Session number'], trend[q26], color='#1565C0', edgecolor='black', linewidth=1.5, width=0.6)
+    sns.heatmap(correlation_matrix, annot=True, fmt='.2f', cmap='RdBu_r', 
+                cbar_kws={'label': 'Correlation Coefficient'}, ax=ax, 
+                linewidths=0.5, linecolor='gray', center=0, vmin=-1, vmax=1,
+                square=True, annot_kws={'size': 9, 'weight': 'bold'},
+                cbar=True)
     
-    # Add value annotations on top of bars
-    for idx, (session, value) in enumerate(zip(trend['Session number'], trend[q26])):
-        ax.text(session, value + 0.3, f'{value:.2f}', 
-               ha='center', va='bottom', fontsize=11, fontweight='bold',
-               color='#1565C0', family='sans-serif')
-    
-    # Add grid - subtle, horizontal only
-    ax.grid(True, axis='y', linestyle='-', alpha=0.2, linewidth=0.5, color='gray')
-    ax.set_axisbelow(True)
-    
-    ax.set_ylim(-0.5, 11)
-    ax.set_yticks(ticks=[0,2,4,6,8,10])
-    ax.set_yticklabels(['0', '2', '4', '6', '8', '10'], fontsize=10)
-    
-    # Clean axes styling
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
-    ax.spines['left'].set_linewidth(1.5)
-    ax.spines['bottom'].set_linewidth(1.5)
-    
-    ax.set_xlabel('Session Number', fontsize=12, fontweight='bold')
-    ax.set_ylabel('Social Impact Score', fontsize=12, fontweight='bold')
-    ax.set_title('Longitudinal Trends in Overall Social Behavior Impact', 
-                fontsize=13, fontweight='bold', pad=20)
+    ax.set_title('Correlation Matrix - All Survey Questions (Q1-Q23)', 
+                 fontsize=16, fontweight='bold', pad=20)
+    plt.xticks(rotation=45, ha='right', fontsize=10)
+    plt.yticks(rotation=0, fontsize=10)
     
     plt.tight_layout()
     st.pyplot(fig)
     
-    # Add spacing between figures
+    # Add spacing
     st.write("")
     st.write("")
     
-    # --- SECOND FIGURE: Breakdown by Autism Level ---
+    # --- Strongest Correlations ---
     st.markdown("---")
-    st.markdown("#### Analysis by Autism Level")
+    st.markdown("#### Strongest Positive and Negative Correlations")
+    
+    # Get upper triangle of correlation matrix to avoid duplicates
+    mask = np.triu(np.ones_like(correlation_matrix, dtype=bool))
+    corr_pairs = []
+    
+    for i in range(len(correlation_matrix.columns)):
+        for j in range(i + 1, len(correlation_matrix.columns)):
+            corr_pairs.append({
+                'Question 1': correlation_matrix.columns[i],
+                'Question 2': correlation_matrix.columns[j],
+                'Correlation': correlation_matrix.iloc[i, j]
+            })
+    
+    corr_df = pd.DataFrame(corr_pairs)
+    
+    # Top 10 positive correlations
+    st.markdown("**Top 10 Strongest Positive Correlations:**")
+    top_positive = corr_df.nlargest(10, 'Correlation')[['Question 1', 'Question 2', 'Correlation']]
+    st.dataframe(top_positive, use_container_width=True, hide_index=True)
+    
     st.write("")
     
-    # Prepare data by autism level
-    if 'Autism Level' in df.columns:
-        autism_trend = df.groupby(['Session number', 'Autism Level'])[q26].mean().reset_index()
-        
-        fig2, ax2 = plt.subplots(figsize=(12, 7))
-        fig2.patch.set_facecolor('white')
-        
-        # Get unique autism levels and assign colors
-        autism_levels = sorted(autism_trend['Autism Level'].dropna().unique())
-        colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8']
-        color_map = {level: colors[i % len(colors)] for i, level in enumerate(autism_levels)}
-        
-        # Plot line for each autism level
-        for level in autism_levels:
-            level_data = autism_trend[autism_trend['Autism Level'] == level]
-            ax2.plot(level_data['Session number'], level_data[q26], 
-                    marker='o', linewidth=2, markersize=8, 
-                    label=f'Autism Level: {level}', 
-                    color=color_map[level])
-            
-            # Add value annotations for each point
-            for _, row in level_data.iterrows():
-                ax2.text(row['Session number'], row[q26] + 0.3, f'{round(row[q26], 4):.2f}',
-                        ha='center', va='bottom', fontsize=8, color=color_map[level])
-        
-        ax2.grid(True, axis='y', linestyle='-', alpha=0.2, linewidth=0.5, color='gray')
-        ax2.set_axisbelow(True)
-        ax2.set_ylim(-0.5, 11)
-        ax2.set_yticks(ticks=[0,2,4,6,8,10])
-        ax2.set_yticklabels(['0', '2', '4', '6', '8', '10'], fontsize=10)
-        
-        # Clean axes
-        ax2.spines['top'].set_visible(False)
-        ax2.spines['right'].set_visible(False)
-        ax2.spines['left'].set_linewidth(1.5)
-        ax2.spines['bottom'].set_linewidth(1.5)
-        
-        ax2.set_xlabel('Session Number', fontsize=12, fontweight='bold')
-        ax2.set_ylabel('Social Impact Score', fontsize=12, fontweight='bold')
-        ax2.set_title('Social Behavior Impact by Autism Level Across Sessions', 
-                     fontsize=13, fontweight='bold', pad=20)
-        ax2.legend(fontsize=10, loc='upper left', frameon=False)
-        
-        fig2.subplots_adjust(top=0.92, bottom=0.1, left=0.1, right=0.95)
-        plt.tight_layout()
-        st.pyplot(fig2)
-    else:
-        st.info("Autism Level column not found for breakdown analysis.")
+    # Top 10 negative correlations
+    st.markdown("**Top 10 Strongest Negative Correlations:**")
+    top_negative = corr_df.nsmallest(10, 'Correlation')[['Question 1', 'Question 2', 'Correlation']]
+    st.dataframe(top_negative, use_container_width=True, hide_index=True)
+    
+    # Add spacing
+    st.write("")
+    st.write("")
+    
+    # --- Summary Statistics ---
+    st.markdown("---")
+    st.markdown("#### Summary Statistics for All Questions")
+    
+    summary_stats = []
+    for i, question in enumerate(available_questions):
+        summary_stats.append({
+            'Question': available_short_names[i],
+            'Mean': f'{df_numeric[question].mean():.2f}',
+            'Std Dev': f'{df_numeric[question].std():.2f}',
+            'Min': f'{df_numeric[question].min():.2f}',
+            'Max': f'{df_numeric[question].max():.2f}',
+            'Count': len(df_numeric[question].dropna())
+        })
+    
+    summary_df = pd.DataFrame(summary_stats)
+    st.dataframe(summary_df, use_container_width=True, hide_index=True)
 

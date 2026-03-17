@@ -70,7 +70,249 @@ def display(df, scale_map=None):
     
     plt.tight_layout()
     st.pyplot(fig)
+    # ============ PARENT VS THERAPIST PERSPECTIVE ANALYSIS ============
+    st.divider()
+    st.subheader("Parent vs Therapist Perspective Analysis")
+    st.markdown("**Engagement and Emotional Connection: Comparing Parent and Therapist Observations**")
     
+    # Map Submitted_by to standardize parent/therapist labels (P/C already mapped to P in Silver data)
+    df_perspective = df.copy()
+    df_perspective['Perspective'] = df_perspective['Submitted_by'].map({
+        'T': 'Therapist',
+        'P': 'Parent'
+    }).fillna('Other')
+    
+    # Filter to only Parent and Therapist data
+    df_perspective = df_perspective[df_perspective['Perspective'].isin(['Parent', 'Therapist'])].copy()
+    
+    if len(df_perspective) > 0:
+        # Calculate trends by perspective and session
+        parent_trend = df_perspective[df_perspective['Perspective'] == 'Parent'].groupby('Session number')[[q1, q3]].mean().reset_index()
+        therapist_trend = df_perspective[df_perspective['Perspective'] == 'Therapist'].groupby('Session number')[[q1, q3]].mean().reset_index()
+        
+        # Create visualization
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
+        fig.patch.set_facecolor('white')
+        
+        # Plot 1: Engagement (Q1) trends by perspective
+        if len(parent_trend) > 0:
+            ax1.plot(parent_trend['Session number'], parent_trend[q1], marker='o', linewidth=2.5, 
+                    markersize=10, label='Parent', color='#9b59b6', markeredgewidth=2, markeredgecolor='white')
+            # Add annotations for parent engagement
+            for idx, row in parent_trend.iterrows():
+                ax1.annotate(f'{row[q1]:.2f}', 
+                           xy=(row['Session number'], row[q1]),
+                           xytext=(0, 25), textcoords='offset points',
+                           ha='center', fontsize=10, fontweight='bold',
+                           color='#9b59b6', family='sans-serif')
+        
+        if len(therapist_trend) > 0:
+            ax1.plot(therapist_trend['Session number'], therapist_trend[q1], marker='s', linewidth=2.5, 
+                    markersize=10, label='Therapist', color='#e67e22', markeredgewidth=2, markeredgecolor='white')
+            # Add annotations for therapist engagement
+            for idx, row in therapist_trend.iterrows():
+                ax1.annotate(f'{row[q1]:.2f}', 
+                           xy=(row['Session number'], row[q1]),
+                           xytext=(0, -28), textcoords='offset points',
+                           ha='center', fontsize=10, fontweight='bold',
+                           color='#e67e22', family='sans-serif')
+        
+        ax1.set_xlabel('Session Number', fontsize=12, fontweight='bold')
+        ax1.set_ylabel('Engagement Score', fontsize=12, fontweight='bold')
+        ax1.set_title('Engagement Across Sessions:\nParent vs Therapist Perspective', fontsize=12, fontweight='bold', pad=15)
+        ax1.set_ylim(-0.8, 4.8)
+        ax1.set_yticks([0, 1, 2, 3, 4])
+        if scale_map:
+            scale_labels = [f"{k}: {v}" for k, v in sorted(scale_map.items())]
+            ax1.set_yticklabels(scale_labels, fontsize=10)
+        else:
+            ax1.set_yticklabels(['0: Not at all', '1: Slightly', '2: Moderately', '3: Very', '4: Fully'], fontsize=10)
+        ax1.grid(True, linestyle='-', alpha=0.3, linewidth=0.5, color='gray')
+        ax1.set_axisbelow(True)
+        ax1.legend(fontsize=11, loc='best', frameon=True, shadow=False)
+        ax1.spines['top'].set_visible(False)
+        ax1.spines['right'].set_visible(False)
+        
+        # Plot 2: Emotional Connection (Q3) trends by perspective
+        if len(parent_trend) > 0:
+            ax2.plot(parent_trend['Session number'], parent_trend[q3], marker='o', linewidth=2.5, 
+                    markersize=10, label='Parent', color='#9b59b6', markeredgewidth=2, markeredgecolor='white')
+            # Add annotations for parent connection
+            for idx, row in parent_trend.iterrows():
+                ax2.annotate(f'{row[q3]:.2f}', 
+                           xy=(row['Session number'], row[q3]),
+                           xytext=(0, 25), textcoords='offset points',
+                           ha='center', fontsize=10, fontweight='bold',
+                           color='#9b59b6', family='sans-serif')
+        
+        if len(therapist_trend) > 0:
+            ax2.plot(therapist_trend['Session number'], therapist_trend[q3], marker='s', linewidth=2.5, 
+                    markersize=10, label='Therapist', color='#e67e22', markeredgewidth=2, markeredgecolor='white')
+            # Add annotations for therapist connection
+            for idx, row in therapist_trend.iterrows():
+                ax2.annotate(f'{row[q3]:.2f}', 
+                           xy=(row['Session number'], row[q3]),
+                           xytext=(0, -28), textcoords='offset points',
+                           ha='center', fontsize=10, fontweight='bold',
+                           color='#e67e22', family='sans-serif')
+        
+        ax2.set_xlabel('Session Number', fontsize=12, fontweight='bold')
+        ax2.set_ylabel('Connection Score', fontsize=12, fontweight='bold')
+        ax2.set_title('Emotional Connection Across Sessions:\nParent vs Therapist Perspective', fontsize=12, fontweight='bold', pad=15)
+        ax2.set_ylim(-0.8, 4.8)
+        ax2.set_yticks([0, 1, 2, 3, 4])
+        if scale_map:
+            scale_labels = [f"{k}: {v}" for k, v in sorted(scale_map.items())]
+            ax2.set_yticklabels(scale_labels, fontsize=10)
+        else:
+            ax2.set_yticklabels(['0: Not at all', '1: Slightly', '2: Moderately', '3: Very', '4: Fully'], fontsize=10)
+        ax2.grid(True, linestyle='-', alpha=0.3, linewidth=0.5, color='gray')
+        ax2.set_axisbelow(True)
+        ax2.legend(fontsize=11, loc='best', frameon=True, shadow=False)
+        ax2.spines['top'].set_visible(False)
+        ax2.spines['right'].set_visible(False)
+        
+        plt.tight_layout()
+        st.pyplot(fig)
+        
+        # Statistics table for perspective comparison
+        st.markdown("**Summary Statistics: Parent vs Therapist Perspective**")
+        
+        perspective_data = []
+        for perspective in ['Parent', 'Therapist']:
+            perspective_df = df_perspective[df_perspective['Perspective'] == perspective]
+            if len(perspective_df) > 0:
+                perspective_data.append({
+                    'Perspective': perspective,
+                    'Total Observations': len(perspective_df),
+                    'Unique Participants': len(perspective_df['Participant id'].unique()),
+                    'Avg Engagement': f"{perspective_df[q1].mean():.2f}",
+                    'Engagement Std Dev': f"{perspective_df[q1].std():.2f}",
+                    'Avg Connection': f"{perspective_df[q3].mean():.2f}",
+                    'Connection Std Dev': f"{perspective_df[q3].std():.2f}"
+                })
+        
+        perspective_comparison_df = pd.DataFrame(perspective_data)
+        st.dataframe(perspective_comparison_df, use_container_width=True, hide_index=True)
+    else:
+        st.warning("No Parent or Therapist data available for perspective analysis")
+
+    # ============ AUTISM LEVEL ANALYSIS ============
+    st.divider()
+    st.subheader("Autism Level Analysis")
+    st.markdown("**Engagement and Emotional Connection Trends by Autism Level**")
+    
+    # Get unique autism levels and filter data
+    autism_levels = sorted(df['Autism Level'].dropna().unique())
+    
+    if len(autism_levels) > 0:
+        # Create visualization
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
+        fig.patch.set_facecolor('white')
+        
+        # Define colors for different autism levels
+        colors_map = {
+            1: '#3498db',  # Blue
+            2: '#e74c3c',  # Red
+            3: '#2ecc71',  # Green
+            4: '#f39c12',  # Orange
+            5: '#9b59b6'   # Purple
+        }
+        
+        # Plot 1: Engagement (Q1) trends by autism level
+        for autism_level in autism_levels:
+            autism_trend = df[df['Autism Level'] == autism_level].groupby('Session number')[[q1, q3]].mean().reset_index()
+            
+            if len(autism_trend) > 0:
+                color = colors_map.get(autism_level, '#95a5a6')
+                ax1.plot(autism_trend['Session number'], autism_trend[q1], marker='o', linewidth=2.5, 
+                        markersize=10, label=f'Level {int(autism_level)}', color=color, markeredgewidth=2, markeredgecolor='white')
+                
+                # Add annotations
+                for idx, row in autism_trend.iterrows():
+                    # Alternate annotation position to avoid overlap
+                    xytext_offset = (0, 12) if idx % 2 == 0 else (0, -15)
+                    ax1.annotate(f'{row[q1]:.2f}', 
+                               xy=(row['Session number'], row[q1]),
+                               xytext=xytext_offset, textcoords='offset points',
+                               ha='center', fontsize=9, fontweight='bold',
+                               color=color, family='sans-serif')
+        
+        ax1.set_xlabel('Session Number', fontsize=12, fontweight='bold')
+        ax1.set_ylabel('Engagement Score', fontsize=12, fontweight='bold')
+        ax1.set_title('Engagement Across Sessions by Autism Level', fontsize=12, fontweight='bold', pad=15)
+        ax1.set_ylim(-0.8, 4.8)
+        ax1.set_yticks([0, 1, 2, 3, 4])
+        if scale_map:
+            scale_labels = [f"{k}: {v}" for k, v in sorted(scale_map.items())]
+            ax1.set_yticklabels(scale_labels, fontsize=10)
+        else:
+            ax1.set_yticklabels(['0: Not at all', '1: Slightly', '2: Moderately', '3: Very', '4: Fully'], fontsize=10)
+        ax1.grid(True, linestyle='-', alpha=0.3, linewidth=0.5, color='gray')
+        ax1.set_axisbelow(True)
+        ax1.legend(fontsize=10, loc='best', frameon=True, shadow=False)
+        ax1.spines['top'].set_visible(False)
+        ax1.spines['right'].set_visible(False)
+        
+        # Plot 2: Emotional Connection (Q3) trends by autism level
+        for autism_level in autism_levels:
+            autism_trend = df[df['Autism Level'] == autism_level].groupby('Session number')[[q1, q3]].mean().reset_index()
+            
+            if len(autism_trend) > 0:
+                color = colors_map.get(autism_level, '#95a5a6')
+                ax2.plot(autism_trend['Session number'], autism_trend[q3], marker='o', linewidth=2.5, 
+                        markersize=10, label=f'Level {int(autism_level)}', color=color, markeredgewidth=2, markeredgecolor='white')
+                
+                # Add annotations
+                for idx, row in autism_trend.iterrows():
+                    # Alternate annotation position to avoid overlap
+                    xytext_offset = (0, 12) if idx % 2 == 0 else (0, -15)
+                    ax2.annotate(f'{row[q3]:.2f}', 
+                               xy=(row['Session number'], row[q3]),
+                               xytext=xytext_offset, textcoords='offset points',
+                               ha='center', fontsize=9, fontweight='bold',
+                               color=color, family='sans-serif')
+        
+        ax2.set_xlabel('Session Number', fontsize=12, fontweight='bold')
+        ax2.set_ylabel('Connection Score', fontsize=12, fontweight='bold')
+        ax2.set_title('Emotional Connection Across Sessions by Autism Level', fontsize=12, fontweight='bold', pad=15)
+        ax2.set_ylim(-0.8, 4.8)
+        ax2.set_yticks([0, 1, 2, 3, 4])
+        if scale_map:
+            scale_labels = [f"{k}: {v}" for k, v in sorted(scale_map.items())]
+            ax2.set_yticklabels(scale_labels, fontsize=10)
+        else:
+            ax2.set_yticklabels(['0: Not at all', '1: Slightly', '2: Moderately', '3: Very', '4: Fully'], fontsize=10)
+        ax2.grid(True, linestyle='-', alpha=0.3, linewidth=0.5, color='gray')
+        ax2.set_axisbelow(True)
+        ax2.legend(fontsize=10, loc='best', frameon=True, shadow=False)
+        ax2.spines['top'].set_visible(False)
+        ax2.spines['right'].set_visible(False)
+        
+        plt.tight_layout()
+        st.pyplot(fig)
+        
+        # Statistics table for autism level comparison
+        st.markdown("**Summary Statistics: Engagement and Connection by Autism Level**")
+        
+        autism_data = []
+        for autism_level in autism_levels:
+            autism_df = df[df['Autism Level'] == autism_level]
+            if len(autism_df) > 0:
+                autism_data.append({
+                    'Autism Level': f'Level {int(autism_level)}',
+                    'Total Observations': len(autism_df),
+                    'Unique Participants': len(autism_df['Participant id'].unique()),
+                    'Avg Engagement': f"{autism_df[q1].mean():.2f}",
+                    'Engagement Std Dev': f"{autism_df[q1].std():.2f}",
+                    'Avg Connection': f"{autism_df[q3].mean():.2f}",
+                    'Connection Std Dev': f"{autism_df[q3].std():.2f}"
+                })
+        
+        autism_comparison_df = pd.DataFrame(autism_data)
+        st.dataframe(autism_comparison_df, use_container_width=True, hide_index=True)
+    else:
+        st.warning("No Autism Level data available for analysis")    
     
     # ============ AGE GROUP ANALYSIS: 8-14 YEARS ============
     st.divider()
@@ -485,10 +727,3 @@ def display(df, scale_map=None):
         
         plt.tight_layout()
         st.pyplot(fig)
-
-    # Display scale reference
-    if scale_map:
-        st.markdown("**Scale Reference:**")
-        scale_df = pd.DataFrame(list(scale_map.items()), columns=['Score', 'Label'])
-        st.table(scale_df)    # Display scale reference
- 

@@ -30,7 +30,7 @@ def display(df, scale_map=None):
     st.markdown("**Analysis based on participants: " + str(len(unique_df)) + " participants**")
     
     # Create tabs for different analyses
-    tab1, tab2, tab3 = st.tabs(["Gender Distribution", "Age Distribution", "Autism Level"])
+    tab1, tab2, tab3, tab4 = st.tabs(["Gender Distribution", "Age Distribution", "Autism Level", "Autism Level by Age Group"])
     
     # ============ TAB 1: GENDER DISTRIBUTION ============
     with tab1:
@@ -232,6 +232,76 @@ def display(df, scale_map=None):
             'Percentage': (autism_counts.values / len(unique_df) * 100).round(2).astype(str) + '%'
         })
         st.dataframe(autism_table, use_container_width=True, hide_index=True)
+    
+    # ============ TAB 4: AUTISM LEVEL BY AGE GROUP ============
+    with tab4:
+        st.markdown("### Autism Severity Level by Age Group")
+        
+        # Filter only relevant age groups (8-14, 15-19, 20-26)
+        relevant_age_groups = ['8-14', '15-19', '20-26']
+        filtered_df = unique_df[unique_df['Age_Group'].isin(relevant_age_groups)].copy()
+        
+        if len(filtered_df) > 0:
+            # Create cross-tabulation of autism level by age group
+            autism_by_age = pd.crosstab(filtered_df['Age_Group'], filtered_df['Autism Level'])
+            autism_by_age = autism_by_age.reindex(relevant_age_groups, fill_value=0)
+            
+            # Visualization
+            fig, ax = plt.subplots(figsize=(12, 6))
+            fig.patch.set_facecolor('white')
+            
+            # Grouped bar chart
+            x = np.arange(len(autism_by_age.index))
+            width = 0.35
+            
+            autism_levels_list = sorted(autism_by_age.columns)
+            colors_bars = ['#2ecc71', '#3498db', '#e74c3c']  # Green for Level 1, Blue for Level 2, Red for Level 3
+            
+            for i, autism_level in enumerate(autism_levels_list):
+                bars = ax.bar(x + (i * width), autism_by_age[autism_level], width, 
+                       label=f'Level {int(autism_level)}', color=colors_bars[i], 
+                       edgecolor='black', linewidth=1.5)
+                
+                # Add value annotations on bars
+                for bar in bars:
+                    height = bar.get_height()
+                    if height > 0:
+                        ax.text(bar.get_x() + bar.get_width()/2., height,
+                               f'{int(height)}',
+                               ha='center', va='bottom', fontsize=10, fontweight='bold')
+            
+            ax.set_title('Autism Level Distribution by Age Group', fontsize=13, fontweight='bold', pad=20)
+            ax.set_xlabel('Age Group', fontsize=11, fontweight='bold')
+            ax.set_ylabel('Number of Participants', fontsize=11, fontweight='bold')
+            ax.set_xticks(x + width / 2)
+            ax.set_xticklabels(autism_by_age.index)
+            ax.grid(axis='y', alpha=0.3, linestyle='--')
+            ax.legend(fontsize=10)
+            
+            plt.tight_layout()
+            st.pyplot(fig)
+            
+            # Table
+            st.markdown("**Autism Level by Age Group Table**")
+            autism_age_table = pd.DataFrame()
+            
+            for age_group in relevant_age_groups:
+                for autism_level in sorted(filtered_df['Autism Level'].unique()):
+                    count = len(filtered_df[(filtered_df['Age_Group'] == age_group) & 
+                                           (filtered_df['Autism Level'] == autism_level)])
+                    if count > 0:
+                        age_total = len(filtered_df[filtered_df['Age_Group'] == age_group])
+                        pct = (count / age_total * 100)
+                        autism_age_table = pd.concat([autism_age_table, pd.DataFrame({
+                            'Age Group': [age_group],
+                            'Autism Level': [f'Level {int(autism_level)}'],
+                            'Count': [count],
+                            'Percentage': [f'{pct:.1f}%']
+                        })], ignore_index=True)
+            
+            st.dataframe(autism_age_table, use_container_width=True, hide_index=True)
+        else:
+            st.warning("No data available for the selected age groups (8-14, 15-19, 20-26)")
     
     # ============ SUMMARY SECTION ============
     st.divider()

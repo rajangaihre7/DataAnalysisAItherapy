@@ -9,10 +9,10 @@ def display(df, scale_map=None):
     q13 = "How much did the relationship between a participant and carer/parent improved?"
     st.markdown("**Q13:** " + q13)
     
-    # create separate trends for therapist (T) and parent (P)
-    # assume Submitted_by column contains 'T' or 'P'
+    # Data is already cleaned via data_transformation.py
+    # P/C is already mapped to P, so we have only T and P
     base = df[['Session number', 'Submitted_by', q13]].copy()
-    base = base[base['Submitted_by'].isin(['T','P'])]
+    base = base.dropna(subset=[q13])
     
     trend_T = base[base['Submitted_by']=='T'].groupby('Session number')[q13].mean().reset_index()
     trend_P = base[base['Submitted_by']=='P'].groupby('Session number')[q13].mean().reset_index()
@@ -65,6 +65,30 @@ def display(df, scale_map=None):
     plt.tight_layout()
     st.pyplot(fig)
     
+    # ============ RQ4 STATISTICS ============
+    st.divider()
+    st.markdown("**Summary Statistics: Relationship Improvement by Perspective**")
+    
+    # Statistics by perspective
+    perspective_data = []
+    for perspective in ['T', 'P']:
+        perspective_df = base[base['Submitted_by'] == perspective]
+        if len(perspective_df) > 0:
+            perspective_name = 'Therapist' if perspective == 'T' else 'Parent'
+            perspective_data.append({
+                'Perspective': perspective_name,
+                'Total Observations': len(perspective_df),
+                'Unique Participants': len(df[df['Submitted_by'] == perspective]['Participant id'].unique()),
+                'Avg Score': f"{perspective_df[q13].mean():.2f}",
+                'Std Dev': f"{perspective_df[q13].std():.2f}",
+                'Min Score': f"{perspective_df[q13].min():.0f}",
+                'Max Score': f"{perspective_df[q13].max():.0f}"
+            })
+    
+    if perspective_data:
+        perspective_df = pd.DataFrame(perspective_data)
+        st.dataframe(perspective_df, use_container_width=True, hide_index=True)
+
     if scale_map:
         st.markdown("**Scale Reference:**")
         scale_df = pd.DataFrame(list(scale_map.items()), columns=['Score', 'Label'])

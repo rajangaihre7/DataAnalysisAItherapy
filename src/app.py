@@ -4,7 +4,7 @@ import os
 import importlib.util
 import sys
 import time
-from data_transformation import load_and_transform_silver_data, get_scale_map
+from data_transformation import get_scale_map
 
 # --- 1. PAGE CONFIG (Must be the very first Streamlit command) ---
 st.set_page_config(page_title="AI Therapy Dashboard", layout="wide")
@@ -15,18 +15,16 @@ def load_data_cached(file_mod_time):
     """Cached data loading that invalidates when file changes"""
     # Get the directory of this script
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    bronze_path = os.path.join(script_dir, "..", "Data", "Bronze", "data_bronze_numeric_format_data.csv")
+    silver_path = os.path.join(script_dir, "..", "Data", "Silver", "data_silver_cleaned.csv")
     
     # Check if file exists to prevent black screen crash
-    if not os.path.exists(bronze_path):
-        return None, f"Error: '{bronze_path}' not found."
+    if not os.path.exists(silver_path):
+        return None, f"Error: '{silver_path}' not found."
     
     try:
-        # Load and transform Bronze data
-        df, error_msg = load_and_transform_silver_data(bronze_path)
-        
-        if error_msg:
-            return None, error_msg
+        # Load Silver data directly (already cleaned)
+        df = pd.read_csv(silver_path, encoding='cp1252')
+        df.columns = df.columns.str.strip()
         
         # Get scale mapping
         scale_map = get_scale_map()
@@ -38,11 +36,11 @@ def load_data_cached(file_mod_time):
 def load_data():
     """Wrapper function that checks file modification time"""
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    bronze_path = os.path.join(script_dir, "..", "Data", "Bronze", "data_bronze_numeric_format_data.csv")
+    silver_path = os.path.join(script_dir, "..", "Data", "Silver", "data_silver_cleaned.csv")
     
     # Get file modification time to invalidate cache when file changes
-    if os.path.exists(bronze_path):
-        file_mod_time = os.path.getmtime(bronze_path)
+    if os.path.exists(silver_path):
+        file_mod_time = os.path.getmtime(silver_path)
     else:
         file_mod_time = 0
     
@@ -77,6 +75,7 @@ else:
     st.sidebar.header("Select Research Question")
     rq_options = {
         # "Welcome / Overview": None,
+        "Exploratory Data Analysis (EDA)": "EDA",
         "Descriptive Analysis": "Descriptive_Analysis",
         "RQ1: Emotional Growth": "RQ1",
         "RQ2: Distress Reduction": "RQ2",
@@ -86,7 +85,9 @@ else:
         "RQ6: Response Time Improvement": "RQ6",
         "RQ7: Personalization & Verbal Participation": "RQ7",
         "RQ8: Social Behaviour Impact": "RQ8",
-        "RQ9: Comprehensive Heatmap Analysis": "RQ9"
+        "RQ9: Comprehensive Heatmap Analysis": "RQ9",
+        "NLP Prerequisites: Gold Dataset": "NLP_prerquesties",
+        "NLP Part B: Sentiment Analysis": "NLP_SentimentAnalysis",
     }
     
     selected = st.sidebar.radio("Analysis View", list(rq_options.keys()))

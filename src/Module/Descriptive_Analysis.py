@@ -15,10 +15,8 @@ def get_age_group(age):
         return "15-19"
     elif 20 <= age <= 26:
         return "20-26"
-    elif 27 <= age <= 35:
-        return "27-35"
-    else:
-        return "36+"
+    return "Other"
+
 
 def display(df, scale_map=None):
     """Display Descriptive Analysis"""

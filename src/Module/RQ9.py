@@ -45,7 +45,12 @@ def display(df, scale_map=None):
     df_numeric = df.copy()
     for question in available_questions:
         df_numeric[question] = pd.to_numeric(df_numeric[question], errors='coerce')
-    
+
+    # Reverse-code Q8 (Distress/boredom/frustration): raw 0=good, 4=bad → apply 4 - Q8 so 4=good
+    q8_col = next((q for q in available_questions if questions_mapping[q].startswith('Q8:')), None)
+    if q8_col is not None:
+        df_numeric[q8_col] = 4 - df_numeric[q8_col]
+
     st.info(f"Found {len(available_questions)} questions for correlation analysis")
     
     # --- CORRELATION HEATMAP ---

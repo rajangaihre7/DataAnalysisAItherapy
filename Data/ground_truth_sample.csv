@@ -1,0 +1,11 @@
+﻿Participant id,Session number,Submitted_by,Additional_notes_observations,Sentiment_Score,Model_Predicted_Label,Manual_Label
+102,8,T,"Greeting behaviors were performed appropriately. Additionally, the use of voice imitation and tonal variation during story dialogue enhanced the effectiveness of the method.",0.99939227104187,1,
+114,8,T,"According to the mother, storytelling has a positive emotional effect on the participant. Despite mild sleepiness, cooperation remained high. The mother also reported that during the week, the participant independently practiced several anger-control techniques introduced in the stories.",0.9994069337844848,1,
+134,9,T,"selective attention improved, and auditory sensitivity increased.",0.9980930685997008,1,
+104,3,P,"Created many situation through play, I fell that my daughter understood concept. My daughter responded very well to the topic.",0.9942160248756408,1,
+107,4,P,Reading stories was effective in improving stories.,0.9998329877853394,1,
+106,8,P,"He attempts to use the techniques. From my perspective as his mother, his condition has improved by approximately 20%.",0.0217422023415565,0,
+109,5,P,We read stories together every night and talk about them. This has helped our relationship improve.,0.9997324347496032,1,
+125,6,P,"Throughout the week, the participant did not mention the stories, and there was no observable impact on anger regulation or negative emotions. The stories are fully memorized. The mother noted that it is unusual that academic material is not memorized as easily, while the stories are retained very well but not applied.",0.0216414835304021,0,
+107,6,T,He connected very well with this episode of the story becayse he obectively understood waiting.,0.9888701438903807,1,
+109,5,T,"At the end of the session, he outlined the methods mentioned in the stories for resolving disagreements.",0.9607779383659364,1,

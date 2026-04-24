@@ -1,0 +1,3 @@
+Mann-Whitney U test: T vs P observer sentiment scores
+U = 9277.0,  p = 0.7445
+Not significant

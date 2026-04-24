@@ -8,8 +8,8 @@ venv/
 .venv/
 env/
 
-# NLP pipeline outputs (large files, generated artifacts)
-results/
+# Generated model weights / large binaries — keep results/ CSVs and PNGs
+# results/  ← removed: pre-computed outputs needed for Streamlit Cloud deployment
 
 # Jupyter
 .ipynb_checkpoints/

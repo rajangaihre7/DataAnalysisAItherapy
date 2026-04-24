@@ -1,0 +1,7 @@
+Parameter,Estimate,Std_Error,CI_Lower,CI_Upper,z_value,p_value,Significance
+Intercept,0.593119,0.042567,0.509689,0.67655,13.9337,0.0,***
+Session_Centred,0.026212,0.003376,0.019595,0.032829,7.764,0.0,***
+Observer_Numeric,0.093652,0.026632,0.041454,0.14585,3.5165,0.000437,***
+Autism_Numeric,-0.236653,0.052785,-0.34011,-0.133195,-4.4833,7e-06,***
+Sentiment_Score,0.041184,0.016087,0.009654,0.072714,2.5601,0.010466,*
+Session_Centred:Observer_Numeric,-0.015227,0.00639,-0.02775,-0.002703,-2.383,0.01717,*

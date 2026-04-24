@@ -1,0 +1,6 @@
+Model,N,Fixed_Effects,AIC,BIC,LogLik,LRT_vs,LRT_chi2,LRT_p
+M1: Null,493,Intercept only,-552.49,-539.89,279.24,—,—,—
+M2: Main Effects,493,Session + Observer + Autism,-609.7,-584.5,310.85,vs M1,63.2132,0.0
+M2: Main (sent. subset),303,Session + Observer + Autism,-357.41,-335.12,184.7,—,—,—
+M3: + Sentiment,303,+ Sentiment Score,-361.48,-335.49,187.74,vs M2(sub),6.0798,0.013674
+M4: + Interaction,303,+ Session × Observer,-365.1,-335.39,190.55,vs M3,5.6152,0.017806

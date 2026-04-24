@@ -1,0 +1,20 @@
+Metric,Value
+Best_Model,Model 4
+N_Full,493
+N_Sentiment,303
+ICC,0.6899
+ICC_pct,69.0%
+Var_Between,0.03331
+Var_Within,0.014974
+M1_AIC,-552.49
+M2_LRT_p,0.0
+Sentiment_Beta,0.0402
+Sentiment_p,0.013489
+M3_LRT_p,0.013674
+Interaction_LRT_p,0.017806
+Best_AIC,-365.1
+Best_BIC,-335.39
+Shapiro_W,0.9926
+Shapiro_p,0.139149
+Random_Intercept_Var,0.020469
+Residual_Var,0.012436

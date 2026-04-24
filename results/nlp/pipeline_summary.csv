@@ -1,0 +1,7 @@
+Metric,Value
+Total records,512.0
+Records with notes,304.0
+Sentiment_Score non-null,304.0
+Sentiment_Score mean,0.573
+Engagement_Score non-null,493.0
+Engagement_Score mean,0.5927

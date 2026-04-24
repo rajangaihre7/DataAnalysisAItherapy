@@ -88,6 +88,7 @@ else:
         "RQ9: Comprehensive Heatmap Analysis": "RQ9",
         "NLP Prerequisites: Gold Dataset": "NLP_prerquesties",
         "NLP Part B: Sentiment Analysis": "NLP_SentimentAnalysis",
+        "LME: Mixed-Effects Modelling": "LME",
     }
     
     selected = st.sidebar.radio("Analysis View", list(rq_options.keys()))
